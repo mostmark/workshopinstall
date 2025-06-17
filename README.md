@@ -19,6 +19,7 @@ oc adm policy add-cluster-role-to-user cluster-admin -z openshift-gitops-argocd-
 ```
 argoPass=$(oc get secret/openshift-gitops-cluster -n openshift-gitops -o jsonpath='{.data.admin\.password}' | base64 -d)
 echo $argoPass
+
 ```
 
 4. Install the Gitea Operator
