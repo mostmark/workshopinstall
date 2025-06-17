@@ -13,3 +13,10 @@ oc apply -f https://raw.githubusercontent.com/mostmark/workshopinstall/refs/head
 oc apply -f https://raw.githubusercontent.com/mostmark/workshopinstall/refs/heads/main/gitea.yaml
 
 ```
+
+3. Install the workshop infra components
+
+```
+oc apply -f https://raw.githubusercontent.com/mostmark/workshopinstall/refs/heads/main/workshop-infra.yaml
+
+```
