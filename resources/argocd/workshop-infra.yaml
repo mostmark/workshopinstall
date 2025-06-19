@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: workshop-infra
+  namespace: openshift-gitops
+spec:
+  destination:
+    namespace: ''
+    server: https://kubernetes.default.svc
+  source:
+    path: ../resources/operators-base
+    repoURL: https://github.com/bmeklund/workshop-install.git
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true # Delete resources that are no longer in Git
+      selfHeal: false # Revert any manual changes made on the cluster
+    syncOptions:
+      - CreateNamespace=true # Important: Allows Argo CD to create the operator namespaces
+      - ApplyOutOfSyncOnly=true # Only sync resources that are out of sync
+  sources: []
+  project: default
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gitea
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  destination:
+    namespace: ''
+    server: https://kubernetes.default.svc
+  source:
+    path: OLMDeploy
+    repoURL: https://github.com/rhpds/gitea-operator
+    targetRevision: HEAD
+  sources: []
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: false
+      syncOptions:
+      - CreateNamespace=true # Important: Allows Argo CD to create the operator namespaces
+      - ApplyOutOfSyncOnly=true # Only sync resources that are out of sync
+      
