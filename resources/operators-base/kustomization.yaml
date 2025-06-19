@@ -6,3 +6,13 @@ resources:
 - devspaces-ns.yaml
 - openshift-pipelines.yaml
 - openshift-dev-spaces.yaml
+patches:
+- patch: |-
+    - op: replace
+      path: /spec/giteaUserNumber
+      value: 1
+  target:
+    group: pfe.rhpds.com
+    kind: Gitea
+    name: gitea-workshop
+    version: v1
