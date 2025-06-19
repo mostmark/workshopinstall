@@ -9,7 +9,11 @@ spec:
     server: https://kubernetes.default.svc
   source:
     path: resources
-    repoURL: https://github.com/mostmark/workshopinstall.git
+    repoURL: https://github.com/bmeklund/workshop-install.git
     targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: false
   sources: []
   project: default

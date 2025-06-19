@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: gitea
   namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   destination:
     namespace: ''
@@ -13,3 +15,7 @@ spec:
     targetRevision: HEAD
   sources: []
   project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: false
