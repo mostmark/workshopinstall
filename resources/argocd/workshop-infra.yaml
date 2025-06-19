@@ -8,7 +8,7 @@ spec:
     namespace: ''
     server: https://kubernetes.default.svc
   source:
-    path: ../resources/operators-base
+    path: /resources/operators-base
     repoURL: https://github.com/bmeklund/workshop-install.git
     targetRevision: HEAD
   syncPolicy:
@@ -45,4 +45,4 @@ spec:
       syncOptions:
       - CreateNamespace=true # Important: Allows Argo CD to create the operator namespaces
       - ApplyOutOfSyncOnly=true # Only sync resources that are out of sync
-      
+
