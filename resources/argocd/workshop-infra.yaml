@@ -47,4 +47,28 @@ spec:
       syncOptions:
       - CreateNamespace=true # Important: Allows Argo CD to create the operator namespaces
       - ApplyOutOfSyncOnly=true # Only sync resources that are out of sync
-
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: operators-instances
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  destination:
+    namespace: ''
+    server: https://kubernetes.default.svc
+  source:
+    path: resources/operators-instances
+    repoURL: https://github.com/bmeklund/workshop-install
+    targetRevision: HEAD
+  sources: []
+  project: default
+  syncPolicy:
+    automated:
+      prune: true # Delete resources that are no longer in Git
+      selfHeal: false # Revert any manual changes made on the cluster
+    syncOptions:
+      - CreateNamespace=true # Important: Allows Argo CD to create the operator namespaces
+      - ApplyOutOfSyncOnly=true # Only sync resources that are out of sync

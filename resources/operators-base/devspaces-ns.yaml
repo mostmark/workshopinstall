@@ -3,4 +3,4 @@ kind: Project
 metadata:
   name: openshift-devspaces
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "1"
