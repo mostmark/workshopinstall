@@ -3,14 +3,18 @@ kind: Application
 metadata:
   name: workshop-infra
   namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   destination:
     namespace: ''
     server: https://kubernetes.default.svc
   source:
-    path: /resources/operators-base
-    repoURL: https://github.com/bmeklund/workshop-install.git
+    path: resources/operators-base
+    repoURL: https://github.com/bmeklund/workshop-install
     targetRevision: HEAD
+  sources: []
+  project: default
   syncPolicy:
     automated:
       prune: true # Delete resources that are no longer in Git
@@ -18,8 +22,6 @@ spec:
     syncOptions:
       - CreateNamespace=true # Important: Allows Argo CD to create the operator namespaces
       - ApplyOutOfSyncOnly=true # Only sync resources that are out of sync
-  sources: []
-  project: default
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
