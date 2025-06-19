@@ -7,31 +7,16 @@ oc apply -f https://raw.githubusercontent.com/mostmark/workshopinstall/refs/head
 
 ```
 
-2. Add cluster role to user
+2. Wait untill installed and ready, then add cluster role to user
 
 ```
 oc adm policy add-cluster-role-to-user cluster-admin -z openshift-gitops-argocd-application-controller -n openshift-gitops
 
 ```
 
-3. Get the Argo password
+3. Install the workshop infra components
 
 ```
-argoPass=$(oc get secret/openshift-gitops-cluster -n openshift-gitops -o jsonpath='{.data.admin\.password}' | base64 -d)
-echo $argoPass
-
-```
-
-4. Install the Gitea Operator
-
-```
-oc apply -f https://raw.githubusercontent.com/mostmark/workshopinstall/refs/heads/main/gitea.yaml
-
-```
-
-5. Install the workshop infra components
-
-```
-oc apply -f https://raw.githubusercontent.com/mostmark/workshopinstall/refs/heads/main/workshop-infra.yaml
+oc apply -f https://raw.githubusercontent.com/bmeklund/workshop-install/refs/heads/main/argocd/workshop-infra.yaml
 
 ```

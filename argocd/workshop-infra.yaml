@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: workshop-infra
+  name: operators-base
   namespace: openshift-gitops
   annotations:
     argocd.argoproj.io/sync-wave: "0"
@@ -10,7 +10,7 @@ spec:
     namespace: ''
     server: https://kubernetes.default.svc
   source:
-    path: resources/operators-base
+    path: operators-base
     repoURL: https://github.com/bmeklund/workshop-install
     targetRevision: HEAD
   sources: []
@@ -60,7 +60,7 @@ spec:
     namespace: ''
     server: https://kubernetes.default.svc
   source:
-    path: resources/operators-instances
+    path: operators-instances
     repoURL: https://github.com/bmeklund/workshop-install
     targetRevision: HEAD
   sources: []
