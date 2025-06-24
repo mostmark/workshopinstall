@@ -22,3 +22,7 @@ spec:
   name: openshift-gitops-operator 
   source: redhat-operators 
   sourceNamespace: openshift-marketplace
+---
+kind: Project
+metadata:
+  name: workshop-infra

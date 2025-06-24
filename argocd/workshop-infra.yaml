@@ -2,12 +2,13 @@ apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
   name: workshop-infra
+  namespace: workshop-infra
 spec:
   generators:
     - list:
         elements:
         - name: gitea
-          namespace: openshift-operators
+          namespace: workshop-infra
           path: OLMDeploy
           repoURL: https://github.com/rhpds/gitea-operator
           targetRevision: HEAD
