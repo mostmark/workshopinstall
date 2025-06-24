@@ -6,24 +6,24 @@ spec:
   generators:
     - list:
         elements:
-          - name: gitea
-            namespace: openshift-operators
-            path: OLMDeploy
-            repoURL: https://github.com/rhpds/gitea-operator
-            targetRevision: HEAD
-            syncWave: 0
-          - name: operators-base
-            namespace: openshift-operators
-            repoURL: https://github.com/bmeklund/workshop-install
-            path: operators-base
-            targetRevision: HEAD
-            syncWave: 1
-          - name: operators-instances
-            namespace: default
-            repoURL: https://github.com/bmeklund/workshop-install
-            path: operators-instances
-            targetRevision: HEAD
-            syncWave: 2
+        - name: gitea
+          namespace: openshift-operators
+          path: OLMDeploy
+          repoURL: https://github.com/rhpds/gitea-operator
+          targetRevision: HEAD
+          syncWave: 0
+        - name: operators-base
+          namespace: openshift-operators
+          repoURL: https://github.com/bmeklund/workshop-install
+          path: operators-base
+          targetRevision: HEAD
+          syncWave: 1
+        - name: operators-instances
+          namespace: default
+          repoURL: https://github.com/bmeklund/workshop-install
+          path: operators-instances
+          targetRevision: HEAD
+          syncWave: 2
   template:
     metadata:
       labels:
