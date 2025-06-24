@@ -2,7 +2,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
   name: workshop-infra
-  namespace: openshift-gitops
 spec:
   generators:
     - list:
@@ -16,13 +15,13 @@ spec:
           - name: operators-base
             namespace: openshift-operators
             repoURL: https://github.com/bmeklund/workshop-install
-            path: 'operators-base'
+            path: operators-base
             targetRevision: HEAD
             syncWave: 1
           - name: operators-instances
             namespace: default
             repoURL: https://github.com/bmeklund/workshop-install
-            path: 'operators-instances'
+            path: operators-instances
             targetRevision: HEAD
             syncWave: 2
   template:
@@ -36,7 +35,7 @@ spec:
         targetRevision: '{{targetRevision}}'
         path: '{{path}}'
       destination:
-        server: 'https://kubernetes.default.svc'
+        server: https://kubernetes.default.svc
         namespace: '{{namespace}}'
       syncPolicy:
         automated:
