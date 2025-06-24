@@ -2,5 +2,3 @@ apiVersion: project.openshift.io/v1
 kind: Project
 metadata:
   name: openshift-devspaces
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"

@@ -8,8 +8,6 @@ kind: Gitea
 metadata:
   name: gitea-workshop
   namespace: gitea
-  annotations:
-    argocd.argoproj.io/sync-wave: "3"
 spec:
   giteaSsl: true
   giteaAdminUser: admin
@@ -19,4 +17,3 @@ spec:
   giteaGenerateUserFormat: "student%d"
   giteaUserNumber: 3
   giteaUserPassword: openshift
----

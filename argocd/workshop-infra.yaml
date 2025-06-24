@@ -1,74 +1,47 @@
 apiVersion: argoproj.io/v1alpha1
-kind: Application
+kind: ApplicationSet
 metadata:
-  name: operators-base
+  name: workshop-infra
   namespace: openshift-gitops
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"
 spec:
-  destination:
-    namespace: ''
-    server: https://kubernetes.default.svc
-  source:
-    path: operators-base
-    repoURL: https://github.com/bmeklund/workshop-install
-    targetRevision: HEAD
-  sources: []
-  project: default
-  syncPolicy:
-    automated:
-      prune: true # Delete resources that are no longer in Git
-      selfHeal: false # Revert any manual changes made on the cluster
-    syncOptions:
-      - CreateNamespace=true # Important: Allows Argo CD to create the operator namespaces
-      - ApplyOutOfSyncOnly=true # Only sync resources that are out of sync
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: gitea
-  namespace: openshift-gitops
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"
-spec:
-  destination:
-    namespace: ''
-    server: https://kubernetes.default.svc
-  source:
-    path: OLMDeploy
-    repoURL: https://github.com/rhpds/gitea-operator
-    targetRevision: HEAD
-  sources: []
-  project: default
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: false
-      syncOptions:
-      - CreateNamespace=true # Important: Allows Argo CD to create the operator namespaces
-      - ApplyOutOfSyncOnly=true # Only sync resources that are out of sync
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: operators-instances
-  namespace: openshift-gitops
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
-spec:
-  destination:
-    namespace: ''
-    server: https://kubernetes.default.svc
-  source:
-    path: operators-instances
-    repoURL: https://github.com/bmeklund/workshop-install
-    targetRevision: HEAD
-  sources: []
-  project: default
-  syncPolicy:
-    automated:
-      prune: true # Delete resources that are no longer in Git
-      selfHeal: false # Revert any manual changes made on the cluster
-    syncOptions:
-      - CreateNamespace=true # Important: Allows Argo CD to create the operator namespaces
-      - ApplyOutOfSyncOnly=true # Only sync resources that are out of sync
+  generators:
+    - list:
+        elements:
+          - name: gitea
+            namespace: openshift-operators
+            path: OLMDeploy
+            repoURL: https://github.com/rhpds/gitea-operator
+            targetRevision: HEAD
+            syncWave: 0
+          - name: operators-base
+            namespace: openshift-operators
+            repoURL: https://github.com/bmeklund/workshop-install
+            path: 'operators-base'
+            targetRevision: HEAD
+            syncWave: 1
+          - name: operators-instances
+            namespace: default
+            repoURL: https://github.com/bmeklund/workshop-install
+            path: 'operators-instances'
+            targetRevision: HEAD
+            syncWave: 2
+  template:
+    metadata:
+      labels:
+        app: '{{name}}'
+    spec:
+      project: default
+      source:
+        repoURL: '{{repoURL}}'
+        targetRevision: '{{targetRevision}}'
+        path: '{{path}}'
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: false
+        syncOptions:
+          - CreateNamespace=true
+          - ApplyOutOfSyncOnly=true # Only sync resources that are out of sync
