@@ -58,4 +58,4 @@ spec:
           - name: "{{dependsOnAppName}}" # Name of the Application to wait for
             namespace: "{{dependsOnAppNamespace}}" # Namespace of the Application to wait for
         {{- end }}
-      goTemplate: true
+  goTemplate: true
