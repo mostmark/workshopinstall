@@ -2,46 +2,54 @@ apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
   name: workshop-infra
-  namespace: workshop-infra
+  namespace: openshift-gitops
 spec:
   generators:
-    - list:
-        elements:
-        - name: gitea
-          namespace: workshop-infra
-          path: OLMDeploy
+  - list:
+      elements:
+        - name: gitea      # Will become the Application name
+          path: OLMDeploy # Path to app manifests in Git
           repoURL: https://github.com/rhpds/gitea-operator
-          targetRevision: HEAD
-          syncWave: 0
+          targetNamespace: workshop-infra # Target namespace for the app
+          syncWave: "0"             # Sync wave for this generated Application
+
         - name: operators-base
-          namespace: openshift-operators
+          path: workshop-base/operators-base
           repoURL: https://github.com/bmeklund/workshop-install
-          path: operators-base
-          targetRevision: HEAD
-          syncWave: 1
+          targetNamespace: openshift-operators
+          syncWave: "1"             # Will sync after database-app's Application is processed
+
         - name: operators-instances
-          namespace: default
+          path: workshop-base/operators-instances
           repoURL: https://github.com/bmeklund/workshop-install
-          path: operators-instances
-          targetRevision: HEAD
-          syncWave: 2
+          targetNamespace: openshift-operators
+          syncWave: "2"             # Will sync after database-app's Application is processed
+
   template:
     metadata:
+      # Name of the generated Argo CD Application.
+      # {{name}} is a placeholder replaced by the directory name (e.g., 'operators-base', 'operators-instances')
+      name: "{{name}}" 
+      namespace: openshift-gitops # Generated Application resources live in the Argo CD namespace
       labels:
-        app: '{{name}}'
+        appset.argocd.argoproj.io/name: my-application-group # Useful for filtering/organization
+      annotations:
+        # Crucial: Apply the sync-wave annotation to the generated Application resource itself
+        argocd.argoproj.io/sync-wave: "{{syncWave}}" 
     spec:
       project: default
       source:
-        repoURL: '{{repoURL}}'
-        targetRevision: '{{targetRevision}}'
-        path: '{{path}}'
+        repoURL: "{{repoURL}}"
+        targetRevision: HEAD
+        # The path to the specific application's manifests within the repo
+        path: "{{path}}" # {{path}} refers to the full path matched by the generator (e.g., 'applications/frontend')
       destination:
-        server: https://kubernetes.default.svc
-        namespace: '{{namespace}}'
+        server: https://kubernetes.default.svc # Deploys to the same cluster where Argo CD is running
+        namespace: "{{targetNamespace}}" # Deploy each app to a namespace matching its directory name
       syncPolicy:
         automated:
-          prune: true
-          selfHeal: false
+          prune: true # Delete resources that are no longer in Git
+          selfHeal: true # Revert any manual changes to match Git
         syncOptions:
-          - CreateNamespace=true
+          - CreateNamespace=true # Important: Automatically creates the namespace if it doesn't exist
           - ApplyOutOfSyncOnly=true # Only sync resources that are out of sync
