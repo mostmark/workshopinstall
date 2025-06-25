@@ -4,8 +4,6 @@ metadata:
   name: workshop-infra
   namespace: openshift-gitops
 spec:
-  goTemplate: true
-  goTemplateOptions: ["missingkey=error"]
   generators:
   - list:
       elements:
@@ -14,21 +12,16 @@ spec:
           repoURL: https://github.com/rhpds/gitea-operator
           targetNamespace: workshop-infra
           syncWave: "0"
-
         - name: operators-base
           path: workshop-base/operators-base
           repoURL: https://github.com/bmeklund/workshop-install
           targetNamespace: openshift-operators
           syncWave: "1"
-
         - name: operators-instances
           path: workshop-base/operators-instances
           repoURL: https://github.com/bmeklund/workshop-install
           targetNamespace: openshift-operators
           syncWave: "2"             # Will sync after operators-base Application is processed
-          dependsOnAppName: "operators-base"
-          dependsOnAppNamespace: openshift-gitops
-
   template:
     metadata:
       name: "{{name}}" 
@@ -53,19 +46,27 @@ spec:
           selfHeal: false # Revert any manual changes to match Git
         syncOptions:
           - CreateNamespace=true # Important: Automatically creates the namespace if it doesn't exist
-          - ApplyOutOfSyncOnly=true # Only sync resources that are out of sync      
-        # Wait for the other Application to be healthy
-  templatePatch: |
-    {{-if .dependsOnAppName }}
-    spec:
-      syncPolicy:
-        automated:
-          prune: true
-          selfHeal: false
-        syncOptions:
-          - CreateNamespace=true 
-          - ApplyOutOfSyncOnly=true
-        syncDependencies:
-          - name: "{{dependsOnAppName}}"
-            namespace: "{{dependsOnAppNamespace}}"
-    {{-end }}
+          - ApplyOutOfSyncOnly=true # Only sync resources that are out of sync
+  strategy:
+    rollingSync:
+      steps:
+        # Step 1: Deploy gitea
+        - matchExpressions:
+            - key: nameLabel
+              operator: In
+              values:
+                - "gitea" 
+        # Step 2: Deploy operators-base in parallell
+        - matchExpressions:
+            - key: nameLabel
+              operator: In
+              values:
+                - "operators-base"
+        # Step 3: Pause for review if needed
+      # - pause: {}
+        # Step 4: Deploy instances
+        - matchExpressions:
+            - key: nameLabel
+              operator: In
+              values:
+                - "operators-instances"    
