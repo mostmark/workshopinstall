@@ -7,17 +7,17 @@ spec:
   generators:
   - list:
       elements:
-        - name: gitea      # Will become the Application name
-          path: OLMDeploy # Path to app manifests in Git
+        - name: gitea
+          path: OLMDeploy
           repoURL: https://github.com/rhpds/gitea-operator
-          targetNamespace: workshop-infra # Target namespace for the app
-          syncWave: "0"             # Sync wave for this generated Application
+          targetNamespace: workshop-infra
+          syncWave: "0"
 
         - name: operators-base
           path: workshop-base/operators-base
           repoURL: https://github.com/bmeklund/workshop-install
           targetNamespace: openshift-operators
-          syncWave: "1"             # Will sync after gitea Application is processed
+          syncWave: "1"
 
         - name: operators-instances
           path: workshop-base/operators-instances
@@ -25,13 +25,12 @@ spec:
           targetNamespace: openshift-operators
           syncWave: "2"             # Will sync after operators-base Application is processed
           dependsOnAppName: "operators-base"
+          dependsOnAppNamespace: openshift-gitops
 
   template:
     metadata:
-      # Name of the generated Argo CD Application.
-      # {{name}} is a placeholder replaced by the directory name (e.g., 'operators-base', 'operators-instances')
       name: "{{name}}" 
-      namespace: openshift-gitops # Generated Application resources live in the Argo CD namespace
+      namespace: openshift-gitops
       labels:
         appset.argocd.argoproj.io/name: dependency-chained-apps 
       annotations:
@@ -42,23 +41,21 @@ spec:
       source:
         repoURL: "{{repoURL}}"
         targetRevision: HEAD
-        # The path to the specific application's manifests within the repo
-        path: "{{path}}" # {{path}} refers to the full path matched by the generator (e.g., 'applications/frontend')
+        path: "{{path}}"
       destination:
-        server: https://kubernetes.default.svc # Deploys to the same cluster where Argo CD is running
-        namespace: "{{targetNamespace}}" # Deploy each app to a namespace matching its directory name
+        server: https://kubernetes.default.svc
+        namespace: "{{targetNamespace}}"
       syncPolicy:
         automated:
           prune: true # Delete resources that are no longer in Git
-          selfHeal: true # Revert any manual changes to match Git
+          selfHeal: false # Revert any manual changes to match Git
         syncOptions:
           - CreateNamespace=true # Important: Automatically creates the namespace if it doesn't exist
           - ApplyOutOfSyncOnly=true # Only sync resources that are out of sync      
         # Wait for the other Application to be healthy
       "{{- if .dependsOnAppName }}"
-
-      syncDependencies: # This is the more modern approach for direct Application dependencies
+      syncDependencies:
         - name: "{{dependsOnAppName}}" # Name of the Application to wait for
-          namespace: "{{targetNamespace}}" # Namespace of the Application to wait for
+          namespace: "{{dependsOnAppNamespace}}" # Namespace of the Application to wait for
       "{{- end }}"
     goTemplate: true
