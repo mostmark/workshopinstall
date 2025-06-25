@@ -17,13 +17,14 @@ spec:
           path: workshop-base/operators-base
           repoURL: https://github.com/bmeklund/workshop-install
           targetNamespace: openshift-operators
-          syncWave: "1"             # Will sync after database-app's Application is processed
+          syncWave: "1"             # Will sync after gitea Application is processed
 
         - name: operators-instances
           path: workshop-base/operators-instances
           repoURL: https://github.com/bmeklund/workshop-install
           targetNamespace: openshift-operators
-          syncWave: "2"             # Will sync after database-app's Application is processed
+          syncWave: "2"             # Will sync after operators-base Application is processed
+          dependsOnAppName: "operators-base"
 
   template:
     metadata:
@@ -32,10 +33,10 @@ spec:
       name: "{{name}}" 
       namespace: openshift-gitops # Generated Application resources live in the Argo CD namespace
       labels:
-        appset.argocd.argoproj.io/name: my-application-group # Useful for filtering/organization
+        appset.argocd.argoproj.io/name: dependency-chained-apps 
       annotations:
         # Crucial: Apply the sync-wave annotation to the generated Application resource itself
-        argocd.argoproj.io/sync-wave: "{{syncWave}}" 
+        argocd.argoproj.io/sync-wave: "{{syncWave}}"
     spec:
       project: default
       source:
@@ -52,4 +53,12 @@ spec:
           selfHeal: true # Revert any manual changes to match Git
         syncOptions:
           - CreateNamespace=true # Important: Automatically creates the namespace if it doesn't exist
-          - ApplyOutOfSyncOnly=true # Only sync resources that are out of sync
+          - ApplyOutOfSyncOnly=true # Only sync resources that are out of sync      
+        # Wait for the other Application to be healthy
+      "{{- if .dependsOnAppName }}"
+
+      syncDependencies: # This is the more modern approach for direct Application dependencies
+        - name: "{{dependsOnAppName}}" # Name of the Application to wait for
+          namespace: "{{targetNamespace}}" # Namespace of the Application to wait for
+      "{{- end }}"
+    goTemplate: true
