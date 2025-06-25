@@ -53,9 +53,9 @@ spec:
           - CreateNamespace=true # Important: Automatically creates the namespace if it doesn't exist
           - ApplyOutOfSyncOnly=true # Only sync resources that are out of sync      
         # Wait for the other Application to be healthy
-      "{{- if .dependsOnAppName }}"
-      syncDependencies:
-        - name: "{{dependsOnAppName}}" # Name of the Application to wait for
-          namespace: "{{dependsOnAppNamespace}}" # Namespace of the Application to wait for
-      "{{- end }}"
-    goTemplate: true
+        {{- if .dependsOnAppName }}
+        syncDependencies:
+          - name: "{{dependsOnAppName}}" # Name of the Application to wait for
+            namespace: "{{dependsOnAppNamespace}}" # Namespace of the Application to wait for
+        {{- end }}
+      goTemplate: true
