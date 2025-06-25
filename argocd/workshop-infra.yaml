@@ -4,6 +4,8 @@ metadata:
   name: workshop-infra
   namespace: openshift-gitops
 spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
   generators:
   - list:
       elements:
@@ -53,9 +55,17 @@ spec:
           - CreateNamespace=true # Important: Automatically creates the namespace if it doesn't exist
           - ApplyOutOfSyncOnly=true # Only sync resources that are out of sync      
         # Wait for the other Application to be healthy
-        {{- if .dependsOnAppName }}
+  templatePatch: |
+    {{-if .dependsOnAppName }}
+    spec:
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: false
+        syncOptions:
+          - CreateNamespace=true 
+          - ApplyOutOfSyncOnly=true
         syncDependencies:
-          - name: "{{dependsOnAppName}}" # Name of the Application to wait for
-            namespace: "{{dependsOnAppNamespace}}" # Namespace of the Application to wait for
-        {{- end }}
-  goTemplate: true
+          - name: "{{dependsOnAppName}}"
+            namespace: "{{dependsOnAppNamespace}}"
+    {{-end }}
