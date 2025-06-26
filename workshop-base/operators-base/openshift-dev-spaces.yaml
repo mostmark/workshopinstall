@@ -8,3 +8,4 @@ spec:
   name: devspaces
   source: redhat-operators
   sourceNamespace: openshift-marketplace
+  installPlanApproval: Automatic # This is crucial for GitOps automation

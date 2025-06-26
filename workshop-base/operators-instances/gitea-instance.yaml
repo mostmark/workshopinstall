@@ -17,4 +17,3 @@ spec:
   giteaGenerateUserFormat: "student%d"
   giteaUserNumber: 3
   giteaUserPassword: openshift
----

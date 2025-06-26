@@ -1,0 +1,72 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: workshop-infra
+  namespace: openshift-gitops
+spec:
+  generators:
+  - list:
+      elements:
+        - name: gitea
+          path: OLMDeploy
+          repoURL: https://github.com/rhpds/gitea-operator
+          targetNamespace: workshop-infra
+          syncWave: "0"
+        - name: operators-base
+          path: workshop-base/operators-base
+          repoURL: https://github.com/bmeklund/workshop-install
+          targetNamespace: openshift-operators
+          syncWave: "1"
+        - name: operators-instances
+          path: workshop-base/operators-instances
+          repoURL: https://github.com/bmeklund/workshop-install
+          targetNamespace: openshift-operators
+          syncWave: "2"             # Will sync after operators-base Application is processed
+  template:
+    metadata:
+      name: "{{name}}" 
+      namespace: openshift-gitops
+      labels:
+        appset.argocd.argoproj.io/name: dependency-chained-apps 
+      annotations:
+        # Crucial: Apply the sync-wave annotation to the generated Application resource itself
+        argocd.argoproj.io/sync-wave: "{{syncWave}}"
+    spec:
+      project: default
+      source:
+        repoURL: "{{repoURL}}"
+        targetRevision: HEAD
+        path: "{{path}}"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{targetNamespace}}"
+      syncPolicy:
+        automated:
+          prune: true # Delete resources that are no longer in Git
+          selfHeal: false # Revert any manual changes to match Git
+        syncOptions:
+          - CreateNamespace=true # Important: Automatically creates the namespace if it doesn't exist
+          - ApplyOutOfSyncOnly=true # Only sync resources that are out of sync
+  strategy:
+    rollingSync:
+      steps:
+        # Step 1: Deploy gitea
+        - matchExpressions:
+            - key: nameLabel
+              operator: In
+              values:
+                - "gitea" 
+        # Step 2: Deploy operators-base in parallell
+        - matchExpressions:
+            - key: nameLabel
+              operator: In
+              values:
+                - "operators-base"
+        # Step 3: Pause for review if needed
+      # - pause: {}
+        # Step 4: Deploy instances
+        - matchExpressions:
+            - key: nameLabel
+              operator: In
+              values:
+                - "operators-instances"    

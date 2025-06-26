@@ -3,35 +3,25 @@
 1. Install the OpenShift GitOps Operator
 
 ```
-oc apply -f https://raw.githubusercontent.com/mostmark/workshopinstall/refs/heads/main/add-openshift-gitops.yaml
+oc apply -f https://raw.githubusercontent.com/bmeklund/workshop-install/refs/heads/main/add-openshift-gitops.yaml
 
 ```
 
-2. Add cluster role to user
+2. Install the workshop infra components
 
 ```
-oc adm policy add-cluster-role-to-user cluster-admin -z openshift-gitops-argocd-application-controller -n openshift-gitops
-
-```
-
-3. Get the Argo password
-
-```
-argoPass=$(oc get secret/openshift-gitops-cluster -n openshift-gitops -o jsonpath='{.data.admin\.password}' | base64 -d)
-echo $argoPass
+oc apply -f https://raw.githubusercontent.com/bmeklund/workshop-install/refs/heads/main/argocd/workshop-infra.yaml
 
 ```
 
-4. Install the Gitea Operator
+# coming features
+
+## progressive sync
+
+enable on argocd instance by adding this to the applicationSet controller in the argocd kind
 
 ```
-oc apply -f https://raw.githubusercontent.com/mostmark/workshopinstall/refs/heads/main/gitea.yaml
-
-```
-
-5. Install the workshop infra components
-
-```
-oc apply -f https://raw.githubusercontent.com/mostmark/workshopinstall/refs/heads/main/workshop-infra.yaml
-
+applicationSet:
+   argocdCommandParameters:
+      - --enable-progressive-sync
 ```
